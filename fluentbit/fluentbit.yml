@@ -21,13 +21,13 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: fluentbit
-    namespace: fluentbit-system
+    namespace: kube-system
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fluentbit-config
-  namespace: fluentbit-system
+  namespace: kube-system
   labels:
     app.kubernetes.io/name: fluentbit
 data:
@@ -67,7 +67,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: fluentbit
-  namespace: fluentbit-system
+  namespace: kube-system
   labels:
     app.kubernetes.io/name: fluentbit
 spec:

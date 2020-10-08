@@ -1,6 +1,6 @@
-# AppMesh Demo
+# Firelens Demo
 
-This demo is designed to show how to provision a cluster using AppMesh.
+This demo is designed to show how to provision a cluster that uses Firelens for logging.
 
 ## Deploy the Cluster
 
@@ -16,7 +16,7 @@ The ALB Ingress Controller will enable your resources to provision Application L
 
 ```bash
 helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
-helm install incubator/aws-alb-ingress-controller \
+helm upgrade -i aws-alb incubator/aws-alb-ingress-controller \
   --namespace kube-system \
   --set clusterName=firelens-demo-cluster \
   --set awsRegion=us-east-2 \
@@ -40,21 +40,10 @@ helm upgrade -i cluster-autoscaler stable/cluster-autoscaler \
   --set serviceAccount.name=cluster-autoscaler
 ```
 
-## Deploy App Mesh Components
+## Deploy the Firelens DaemonSet
+
+To leverage Firelens with EKS we deploy a DaemonSet. This DaemonSet will leverage the `fluentbit` service account we created in the `cluster.yml` to have access to write logs to Cloudwatch and Firehose. This is configured to create and write logs to the `fluentbit-cloudwatch` log group within Cloudwatch Logs.
 
 ```bash
-helm repo add eks https://aws.github.io/eks-charts
-
-kubectl apply -k github.com/aws/eks-charts/stable/appmesh-controller//crds?ref=master
-
-helm upgrade -i appmesh-controller eks/appmesh-controller \
-  --namespace appmesh-system \
-  --set serviceAccount.create=false \
-  --set serviceAccount.name=appmesh-controller
-
-helm upgrade -i appmesh-inject eks/appmesh-inject \
-  --namespace appmesh-system \
-  --set mesh.name=dj-app \
-  --set tracing.enabled=true \
-  --set tracing.provider=x-ray
+kubectl apply -f ./firelens.yml
 ```

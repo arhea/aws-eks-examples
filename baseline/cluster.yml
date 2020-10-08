@@ -1,0 +1,225 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+# define basic metadata about the cluster
+metadata:
+  name: baseline
+  region: us-east-2
+
+# configure public and private access to the cluster
+# we recommend limiting this to private if you dont need
+# external access to the cluster
+vpc:
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
+# forward important control plane logs to cloudwatch
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+      - "audit"
+      - "authenticator"
+
+# configure a managed node group for running workloads
+managedNodeGroups:
+  - name: ng-1
+    instanceType: t3.xlarge
+    minSize: 2
+    desiredCapacity: 3
+    maxSize: 4
+    privateNetworking: true
+    labels:
+      role: worker
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/baseline: "true"
+
+# enable the IAM integration with EKS
+iam:
+  withOIDC: true
+
+  # define service account roles for least privileged containers
+  serviceAccounts:
+
+    - metadata:
+        name: default
+        namespace: default
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AWSDenyAll
+
+    - metadata:
+        name: default
+        namespace: kube-system
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AWSDenyAll
+
+    - metadata:
+        name: ebs-csi-controller-sa
+        namespace: kube-system
+        labels:
+          aws-usage: cluster-ops
+          app.kubernetes.io/name: aws-ebs-csi-driver
+      attachPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "ec2:AttachVolume"
+            - "ec2:CreateSnapshot"
+            - "ec2:CreateTags"
+            - "ec2:CreateVolume"
+            - "ec2:DeleteSnapshot"
+            - "ec2:DeleteTags"
+            - "ec2:DeleteVolume"
+            - "ec2:DescribeInstances"
+            - "ec2:DescribeSnapshots"
+            - "ec2:DescribeTags"
+            - "ec2:DescribeVolumes"
+            - "ec2:DetachVolume"
+            - "ec2:ModifyVolume"
+
+    - metadata:
+        name: cluster-autoscaler
+        namespace: kube-system
+        labels:
+          aws-usage: cluster-ops
+          app.kubernetes.io/name: cluster-autoscaler
+      attachPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "autoscaling:DescribeAutoScalingGroups"
+            - "autoscaling:DescribeAutoScalingInstances"
+            - "autoscaling:DescribeLaunchConfigurations"
+            - "autoscaling:DescribeTags"
+            - "autoscaling:SetDesiredCapacity"
+            - "autoscaling:TerminateInstanceInAutoScalingGroup"
+
+    - metadata:
+        name: external-dns
+        namespace: kube-system
+        labels:
+          aws-usage: cluster-ops
+          app.kubernetes.io/name: external-dns
+      attachPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Resource: "arn:aws:route53:::hostedzone/*"
+          Action:
+            - "route53:ChangeResourceRecordSets"
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "route53:ListHostedZones"
+            - "route53:ListResourceRecordSets"
+
+    - metadata:
+        name: fluentbit
+        namespace: kube-system
+      attachPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Resource: "*"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:PutRetentionPolicy"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "logs:DescribeLogStreams"
+              - "logs:GetLogEvents"
+
+    - metadata:
+        name: alb-ingress-controller
+        namespace: kube-system
+        labels:
+          aws-usage: cluster-ops
+          app.kubernetes.io/name: alb-ingress-controller
+      attachPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Resource: "*"
+          Action:
+            - "acm:DescribeCertificate"
+            - "acm:ListCertificates"
+            - "acm:GetCertificate"
+            - "ec2:AuthorizeSecurityGroupIngress"
+            - "ec2:CreateSecurityGroup"
+            - "ec2:CreateTags"
+            - "ec2:DeleteTags"
+            - "ec2:DeleteSecurityGroup"
+            - "ec2:DescribeAccountAttributes"
+            - "ec2:DescribeAddresses"
+            - "ec2:DescribeInstances"
+            - "ec2:DescribeInstanceStatus"
+            - "ec2:DescribeInternetGateways"
+            - "ec2:DescribeNetworkInterfaces"
+            - "ec2:DescribeSecurityGroups"
+            - "ec2:DescribeSubnets"
+            - "ec2:DescribeTags"
+            - "ec2:DescribeVpcs"
+            - "ec2:ModifyInstanceAttribute"
+            - "ec2:ModifyNetworkInterfaceAttribute"
+            - "ec2:RevokeSecurityGroupIngress"
+            - "elasticloadbalancing:AddListenerCertificates"
+            - "elasticloadbalancing:AddTags"
+            - "elasticloadbalancing:CreateListener"
+            - "elasticloadbalancing:CreateLoadBalancer"
+            - "elasticloadbalancing:CreateRule"
+            - "elasticloadbalancing:CreateTargetGroup"
+            - "elasticloadbalancing:DeleteListener"
+            - "elasticloadbalancing:DeleteLoadBalancer"
+            - "elasticloadbalancing:DeleteRule"
+            - "elasticloadbalancing:DeleteTargetGroup"
+            - "elasticloadbalancing:DeregisterTargets"
+            - "elasticloadbalancing:DescribeListenerCertificates"
+            - "elasticloadbalancing:DescribeListeners"
+            - "elasticloadbalancing:DescribeLoadBalancers"
+            - "elasticloadbalancing:DescribeLoadBalancerAttributes"
+            - "elasticloadbalancing:DescribeRules"
+            - "elasticloadbalancing:DescribeSSLPolicies"
+            - "elasticloadbalancing:DescribeTags"
+            - "elasticloadbalancing:DescribeTargetGroups"
+            - "elasticloadbalancing:DescribeTargetGroupAttributes"
+            - "elasticloadbalancing:DescribeTargetHealth"
+            - "elasticloadbalancing:ModifyListener"
+            - "elasticloadbalancing:ModifyLoadBalancerAttributes"
+            - "elasticloadbalancing:ModifyRule"
+            - "elasticloadbalancing:ModifyTargetGroup"
+            - "elasticloadbalancing:ModifyTargetGroupAttributes"
+            - "elasticloadbalancing:RegisterTargets"
+            - "elasticloadbalancing:RemoveListenerCertificates"
+            - "elasticloadbalancing:RemoveTags"
+            - "elasticloadbalancing:SetIpAddressType"
+            - "elasticloadbalancing:SetSecurityGroups"
+            - "elasticloadbalancing:SetSubnets"
+            - "elasticloadbalancing:SetWebAcl"
+            - "iam:CreateServiceLinkedRole"
+            - "iam:GetServerCertificate"
+            - "iam:ListServerCertificates"
+            - cognito-idp:DescribeUserPoolClient"
+            - "waf-regional:GetWebACLForResource"
+            - "waf-regional:GetWebACL"
+            - "waf-regional:AssociateWebACL"
+            - "waf-regional:DisassociateWebACL"
+            - "tag:GetResources"
+            - "tag:TagResources"
+            - "waf:GetWebACL"
+            - "wafv2:GetWebACL"
+            - "wafv2:GetWebACLForResource"
+            - "wafv2:AssociateWebACL"
+            - "wafv2:DisassociateWebACL"
+            - "shield:DescribeProtection"
+            - "shield:GetSubscriptionState"
+            - "shield:DeleteProtection"
+            - "shield:CreateProtection"
+            - "shield:DescribeSubscription"
+            - "shield:ListProtections"
+
+

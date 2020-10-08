@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exmaple-unprivileged
+spec:
+  containers:
+    - name:  pause
+      image: k8s.gcr.io/pause

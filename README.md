@@ -4,6 +4,22 @@ _Disclaimer: This code is for demo purposes only and should not be treated as pr
 
 This repository is a set of exmaples that I use to demonstrate and test the capabilities of EKS. The most up to date source of learning EKS is the [eksworkshop.com](https://eksworkshop.com). This workshop will contain information and starting places for configurations.
 
+## Usage
+
+This repository uses a shared configuration for the `eksctl`, then combines the configurations using `yq`.
+
+```bash
+# install yq for merging yaml
+brew install yq
+
+# install eksctl
+brew tap weaveworks/tap
+brew install eksctl
+
+# install kubernetes cli
+brew install kubernetes-cli
+```
+
 ## Table of Contents
 
 - [Baseline](./baseline/) - This is the baseline configuration that is shared across all of the examples

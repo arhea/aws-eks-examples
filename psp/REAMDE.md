@@ -1,15 +1,17 @@
-# Demo - Pod Security Policy on EKS
+# Amazon EKS Example - Pod Security Policy on EKS
 
 ```bash
-brew install yq
 
+# merge the baseline cluster configuration with this cluster
 yq merge -a overwrite -x ../baseline/cluster.yml ./cluster.tpl.yml > cluster.yml
 
+# create the cluster
 eksctl create cluster -f ./cluster.yml
 
-kubectl delete psp/eks.privileged
-
+# delete the default psp objects in eks
 kubectl delete -f ./psp-default.yml
+
+# apply the privileged and restricted psps defined in this folder
 kubectl apply -f ./psp-privileged.yml
 kubectl apply -f ./psp-restricted.yml
 
@@ -32,6 +34,7 @@ kubectl-user auth can-i use podsecuritypolicy/eks.restricted
 kubectl apply -f ./example-unprivileged.yml
 kubectl apply -f ./example-privileged.yml
 
+# cleanup examples
 kubectl delete -f ./example-unprivileged.yml
 kubectl delete -f ./example-privileged.yml
 
@@ -39,6 +42,7 @@ kubectl delete -f ./example-privileged.yml
 kubectl-user apply -f ./example-unprivileged.yml
 kubectl-user apply -f ./example-privileged.yml
 
+# cleanup examples
 kubectl-user delete -f ./example-unprivileged.yml
 kubectl-user delete -f ./example-privileged.yml
 ```

@@ -1,0 +1,35 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: gpu
+  region: us-east-1
+
+managedNodeGroups:
+  - name: ng-general
+    instanceType: t3.xlarge
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 6
+    privateNetworking: true
+    labels:
+      role: "worker"
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/baseline: "true"
+
+  - name: ng-gpu
+    instanceType: p3.2xlarge
+    minSize: 1
+    desiredCapacity: 1
+    maxSize: 6
+    privateNetworking: true
+    labels:
+      role: "worker"
+      nvidia.com/gpu: "true"
+      k8s.amazonaws.com/accelerator: "nvidia-tesla"
+    tags:
+      k8s.io/cluster-autoscaler/enabled: "true"
+      k8s.io/cluster-autoscaler/baseline: "true"
+      k8s.io/cluster-autoscaler/node-template/taint/dedicated: "nvidia.com/gpu=true"
+      k8s.io/cluster-autoscaler/node-template/label/nvidia.com/gpu: "true"

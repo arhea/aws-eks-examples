@@ -14,9 +14,12 @@ nodeGroups:
     maxSize: 6
     privateNetworking: true
     amiFamily: Bottlerocket
-    disablePodIMDS: true
+    ami: auto-ssm
     labels:
-      bottlerocket.aws/updater-interface-version: 1.0.0
+      bottlerocket.aws/updater-interface-version: 2.0.0
+    ssh:
+      allow: true
+      publicKeyName: alexrhea
     iam:
        attachPolicyARNs:
           - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
@@ -24,5 +27,6 @@ nodeGroups:
           - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
           - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
     bottlerocket:
+      enableAdminContainer: true
       settings:
         motd: "Example Bottlerocket Deployment!"

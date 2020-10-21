@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-smi-1
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: nvidia-smi
+    image: nvidia/cuda:latest
+    args:
+      - "nvidia-smi"
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-smi-2
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: nvidia-smi
+    image: nvidia/cuda:latest
+    args:
+      - "nvidia-smi"
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nvidia-smi-3
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: nvidia-smi
+    image: nvidia/cuda:latest
+    args:
+      - "nvidia-smi"
+    resources:
+      limits:
+        nvidia.com/gpu: 1

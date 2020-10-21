@@ -15,7 +15,7 @@ _This takes about 25-30 minutes to complete._
 ## Deploy the Kubernetes Dashboard (optional):
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 ```
 
 To access the dashboard run:
